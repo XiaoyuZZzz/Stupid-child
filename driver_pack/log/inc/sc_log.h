@@ -19,6 +19,9 @@
     SEGGER_RTT_printf(Index,sFormat);\
     SEGGER_RTT_printf(Index,"[:%s->%s],%s ",__FILE__,__func__, ##__VA_ARGS__);\
 }while(0);
+
+#else 
+#define LOG_I(ID,Index,sFormat,...)  ((void)0)
 #endif
 
 #ifdef UART_DEBUG_ENABLE
