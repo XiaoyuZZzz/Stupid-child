@@ -16,7 +16,7 @@
 
 ### 项目的结构设计
 
-![项目的结构设计](C:\Users\user\AppData\Roaming\Typora\typora-user-images\image-20250706145208264.png)
+![项目结构设计](picture\image-20250706145208264.png)
 
 ### 项目功能介绍
 
