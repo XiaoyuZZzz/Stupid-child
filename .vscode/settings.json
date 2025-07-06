@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "sc_type.h": "c",
+        "segger_rtt.h": "c",
+        "sc_conf.h": "c"
+    }
+}

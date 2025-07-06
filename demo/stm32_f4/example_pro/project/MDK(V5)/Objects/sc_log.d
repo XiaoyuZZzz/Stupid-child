@@ -1,0 +1,16 @@
+.\objects\sc_log.o: ..\..\..\..\..\driver_pack\log\src\sc_log.c
+.\objects\sc_log.o: ..\..\..\..\..\driver_pack\log\inc\sc_log.h
+.\objects\sc_log.o: ..\..\..\..\..\driver_pack\sc_type.h
+.\objects\sc_log.o: ..\..\libraries\CMSIS\Include\core_cm4.h
+.\objects\sc_log.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\sc_log.o: ..\..\libraries\CMSIS\Include\core_cmInstr.h
+.\objects\sc_log.o: ..\..\libraries\CMSIS\Include\core_cmFunc.h
+.\objects\sc_log.o: ..\..\libraries\CMSIS\Include\core_cmSimd.h
+.\objects\sc_log.o: ..\..\libraries\CMSIS\Device\ST\STM32F4xx\Include\system_stm32f4xx.h
+.\objects\sc_log.o: ..\..\..\..\..\driver_pack\sc_conf.h
+.\objects\sc_log.o: ..\..\..\..\..\driver_pack\user_conf.h
+.\objects\sc_log.o: ..\..\..\..\..\driver_pack\log\inc\sc_log.h
+.\objects\sc_log.o: ..\..\RTT\SEGGER_RTT.h
+.\objects\sc_log.o: ..\..\RTT\Config\../Config/SEGGER_RTT_Conf.h
+.\objects\sc_log.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\objects\sc_log.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
