@@ -42,7 +42,7 @@
 .\objects\main.o: ..\..\..\..\..\driver_pack\sc_type.h
 .\objects\main.o: ..\..\libraries\CMSIS\Include\core_cm4.h
 .\objects\main.o: ..\..\..\..\..\driver_pack\sc_conf.h
-.\objects\main.o: ..\..\RTT\SEGGER_RTT.h
-.\objects\main.o: ..\..\RTT\Config\../Config/SEGGER_RTT_Conf.h
+.\objects\main.o: ..\..\..\..\..\driver_pack\RTT\SEGGER_RTT.h
+.\objects\main.o: ..\..\..\..\..\driver_pack\RTT\Config\../Config/SEGGER_RTT_Conf.h
 .\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h

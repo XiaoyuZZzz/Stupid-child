@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F40_41xxx,</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\app;..\..\board;..\..\bsp;..\..\libraries\CMSIS\Include;..\..\libraries\CMSIS\Device\ST\STM32F4xx\Include;..\..\libraries\STM32F4xx_StdPeriph_Driver\inc;..\..\module;..\..\bsp\uart;..\..\RTT;..\..\RTT\Config;..\..\..\..\..\driver_pack;..\..\..\..\..\driver_pack\log\src;..\..\..\..\..\driver_pack\log\inc</IncludePath>
+              <IncludePath>..\..\app;..\..\board;..\..\bsp;..\..\libraries\CMSIS\Include;..\..\libraries\CMSIS\Device\ST\STM32F4xx\Include;..\..\libraries\STM32F4xx_StdPeriph_Driver\inc;..\..\module;..\..\bsp\uart;..\..\..\..\..\driver_pack;..\..\..\..\..\driver_pack\log\src;..\..\..\..\..\driver_pack\log\inc;..\..\..\..\..\driver_pack\RTT;..\..\..\..\..\driver_pack\RTT\Config</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -650,12 +650,12 @@
             <File>
               <FileName>SEGGER_RTT.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\RTT\SEGGER_RTT.c</FilePath>
+              <FilePath>..\..\..\..\..\driver_pack\RTT\SEGGER_RTT.c</FilePath>
             </File>
             <File>
               <FileName>SEGGER_RTT_printf.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\RTT\SEGGER_RTT_printf.c</FilePath>
+              <FilePath>..\..\..\..\..\driver_pack\RTT\SEGGER_RTT_printf.c</FilePath>
             </File>
           </Files>
         </Group>

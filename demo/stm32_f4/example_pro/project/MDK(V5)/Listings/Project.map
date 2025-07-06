@@ -8,8 +8,6 @@ Section Cross References
     system_stm32f4xx.o(i.SystemInit) refers to system_stm32f4xx.o(i.SetSysClock) for SetSysClock
     main.o(i.main) refers to board.o(i.board_init) for board_init
     main.o(i.main) refers to bsp_uart.o(i.uart1_init) for uart1_init
-    main.o(i.main) refers to stm32f4xx_rcc.o(i.RCC_AHB1PeriphClockCmd) for RCC_AHB1PeriphClockCmd
-    main.o(i.main) refers to stm32f4xx_gpio.o(i.GPIO_Init) for GPIO_Init
     main.o(i.main) refers to segger_rtt.o(i.SEGGER_RTT_SetTerminal) for SEGGER_RTT_SetTerminal
     main.o(i.main) refers to segger_rtt_printf.o(i.SEGGER_RTT_printf) for SEGGER_RTT_printf
     main.o(i.main) refers to board.o(i.delay_1ms) for delay_1ms
@@ -1255,8 +1253,8 @@ Image Symbol Table
     ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpya.o ABSOLUTE
     ../clib/microlib/string/memset.c         0x00000000   Number         0  memseta.o ABSOLUTE
     ../clib/microlib/string/strlen.c         0x00000000   Number         0  strlen.o ABSOLUTE
-    ..\..\RTT\SEGGER_RTT.c                   0x00000000   Number         0  segger_rtt.o ABSOLUTE
-    ..\..\RTT\SEGGER_RTT_printf.c            0x00000000   Number         0  segger_rtt_printf.o ABSOLUTE
+    ..\..\..\..\..\driver_pack\RTT\SEGGER_RTT.c 0x00000000   Number         0  segger_rtt.o ABSOLUTE
+    ..\..\..\..\..\driver_pack\RTT\SEGGER_RTT_printf.c 0x00000000   Number         0  segger_rtt_printf.o ABSOLUTE
     ..\..\app\main.c                         0x00000000   Number         0  main.o ABSOLUTE
     ..\..\board\board.c                      0x00000000   Number         0  board.o ABSOLUTE
     ..\..\bsp\uart\bsp_uart.c                0x00000000   Number         0  bsp_uart.o ABSOLUTE
@@ -1428,13 +1426,13 @@ Image Symbol Table
     i.delay_1ms                              0x080010cc   Section        0  board.o(i.delay_1ms)
     i.delay_us                               0x080010e0   Section        0  board.o(i.delay_us)
     i.main                                   0x08001134   Section        0  main.o(i.main)
-    i.uart1_init                             0x0800121c   Section        0  bsp_uart.o(i.uart1_init)
-    .constdata                               0x08001314   Section        5  main.o(.constdata)
-    __func__                                 0x08001314   Data           5  main.o(.constdata)
-    .constdata                               0x08001319   Section       17  segger_rtt.o(.constdata)
-    _aInitStr                                0x08001319   Data          17  segger_rtt.o(.constdata)
-    .constdata                               0x0800132a   Section       16  segger_rtt_printf.o(.constdata)
-    _aV2C                                    0x0800132a   Data          16  segger_rtt_printf.o(.constdata)
+    i.uart1_init                             0x080011e8   Section        0  bsp_uart.o(i.uart1_init)
+    .constdata                               0x080012e0   Section        5  main.o(.constdata)
+    __func__                                 0x080012e0   Data           5  main.o(.constdata)
+    .constdata                               0x080012e5   Section       17  segger_rtt.o(.constdata)
+    _aInitStr                                0x080012e5   Data          17  segger_rtt.o(.constdata)
+    .constdata                               0x080012f6   Section       16  segger_rtt_printf.o(.constdata)
+    _aV2C                                    0x080012f6   Data          16  segger_rtt_printf.o(.constdata)
     .data                                    0x20000000   Section       20  system_stm32f4xx.o(.data)
     .data                                    0x20000014   Section       16  stm32f4xx_rcc.o(.data)
     APBAHBPrescTable                         0x20000014   Data          16  stm32f4xx_rcc.o(.data)
@@ -1603,10 +1601,10 @@ Image Symbol Table
     board_init                               0x080010a1   Thumb Code    38  board.o(i.board_init)
     delay_1ms                                0x080010cd   Thumb Code    18  board.o(i.delay_1ms)
     delay_us                                 0x080010e1   Thumb Code    74  board.o(i.delay_us)
-    main                                     0x08001135   Thumb Code   146  main.o(i.main)
-    uart1_init                               0x0800121d   Thumb Code   238  bsp_uart.o(i.uart1_init)
-    Region$$Table$$Base                      0x0800133c   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x0800135c   Number         0  anon$$obj.o(Region$$Table)
+    main                                     0x08001135   Thumb Code   100  main.o(i.main)
+    uart1_init                               0x080011e9   Thumb Code   238  bsp_uart.o(i.uart1_init)
+    Region$$Table$$Base                      0x08001308   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x08001328   Number         0  anon$$obj.o(Region$$Table)
     SystemCoreClock                          0x20000000   Data           4  system_stm32f4xx.o(.data)
     AHBPrescTable                            0x20000004   Data          16  system_stm32f4xx.o(.data)
     _SEGGER_RTT                              0x20000038   Data         168  segger_rtt.o(.bss)
@@ -1620,9 +1618,9 @@ Memory Map of the image
 
   Image Entry point : 0x08000189
 
-  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00001394, Max: 0x00080000, ABSOLUTE)
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00001360, Max: 0x00080000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x0000135c, Max: 0x00080000, ABSOLUTE)
+    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x00001328, Max: 0x00080000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -1693,23 +1691,23 @@ Memory Map of the image
     0x080010cc   0x080010cc   0x00000012   Code   RO          335    i.delay_1ms         board.o
     0x080010de   0x080010de   0x00000002   PAD
     0x080010e0   0x080010e0   0x00000054   Code   RO          338    i.delay_us          board.o
-    0x08001134   0x08001134   0x000000e8   Code   RO          148    i.main              main.o
-    0x0800121c   0x0800121c   0x000000f8   Code   RO          296    i.uart1_init        bsp_uart.o
-    0x08001314   0x08001314   0x00000005   Data   RO          149    .constdata          main.o
-    0x08001319   0x08001319   0x00000011   Data   RO         5424    .constdata          segger_rtt.o
-    0x0800132a   0x0800132a   0x00000010   Data   RO         5628    .constdata          segger_rtt_printf.o
-    0x0800133a   0x0800133a   0x00000002   PAD
-    0x0800133c   0x0800133c   0x00000020   Data   RO         5684    Region$$Table       anon$$obj.o
+    0x08001134   0x08001134   0x000000b4   Code   RO          148    i.main              main.o
+    0x080011e8   0x080011e8   0x000000f8   Code   RO          296    i.uart1_init        bsp_uart.o
+    0x080012e0   0x080012e0   0x00000005   Data   RO          149    .constdata          main.o
+    0x080012e5   0x080012e5   0x00000011   Data   RO         5424    .constdata          segger_rtt.o
+    0x080012f6   0x080012f6   0x00000010   Data   RO         5628    .constdata          segger_rtt_printf.o
+    0x08001306   0x08001306   0x00000002   PAD
+    0x08001308   0x08001308   0x00000020   Data   RO         5684    Region$$Table       anon$$obj.o
 
 
-    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x0800135c, Size: 0x000008f0, Max: 0x00020000, ABSOLUTE)
+    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x08001328, Size: 0x000008f0, Max: 0x00020000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x0800135c   0x00000014   Data   RW            7    .data               system_stm32f4xx.o
-    0x20000014   0x08001370   0x00000010   Data   RW         3238    .data               stm32f4xx_rcc.o
-    0x20000024   0x08001380   0x00000011   Data   RW         5425    .data               segger_rtt.o
-    0x20000035   0x08001391   0x00000003   PAD
+    0x20000000   0x08001328   0x00000014   Data   RW            7    .data               system_stm32f4xx.o
+    0x20000014   0x0800133c   0x00000010   Data   RW         3238    .data               stm32f4xx_rcc.o
+    0x20000024   0x0800134c   0x00000011   Data   RW         5425    .data               segger_rtt.o
+    0x20000035   0x0800135d   0x00000003   PAD
     0x20000038        -       0x000004b8   Zero   RW         5423    .bss                segger_rtt.o
     0x200004f0        -       0x00000400   Zero   RW          284    STACK               startup_stm32f40xx.o
 
@@ -1723,10 +1721,10 @@ Image component sizes
 
        146         16          0          0          0       1760   board.o
        280         14          0          0          0       1373   bsp_uart.o
-       232         86          5          0          0       1287   main.o
+       180         80          5          0          0       1211   main.o
        160         14          0          0          0       2002   misc.o
-       710         54         17         17       1208      10775   segger_rtt.o
-      1096          6         16          0          0       6029   segger_rtt_printf.o
+       710         54         17         17       1208      11211   segger_rtt.o
+      1096          6         16          0          0       6333   segger_rtt_printf.o
         36          8        392          0       1024        988   startup_stm32f40xx.o
        232          0          0          0          0       2865   stm32f4xx_gpio.o
         26          0          0          0          0       4594   stm32f4xx_it.o
@@ -1735,7 +1733,7 @@ Image component sizes
        340         32          0         20          0     274529   system_stm32f4xx.o
 
     ----------------------------------------------------------------------
-      4334        314        464         56       2232     319498   Object Totals
+      4282        308        464         56       2232     320162   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         10          0          2          3          0          0   (incl. Padding)
 
@@ -1776,15 +1774,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      4492        330        464         56       2232     315694   Grand Totals
-      4492        330        464         56       2232     315694   ELF Image Totals
-      4492        330        464         56          0          0   ROM Totals
+      4440        324        464         56       2232     316358   Grand Totals
+      4440        324        464         56       2232     316358   ELF Image Totals
+      4440        324        464         56          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                 4956 (   4.84kB)
+    Total RO  Size (Code + RO Data)                 4904 (   4.79kB)
     Total RW  Size (RW Data + ZI Data)              2288 (   2.23kB)
-    Total ROM Size (Code + RO Data + RW Data)       5012 (   4.89kB)
+    Total ROM Size (Code + RO Data + RW Data)       4960 (   4.84kB)
 
 ==============================================================================
 
