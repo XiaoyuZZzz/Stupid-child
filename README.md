@@ -16,7 +16,7 @@
 
 ### 项目的结构设计
 
-![项目结构设计](picture\image-20250706145208264.png)
+![项目结构设计](https://github.com/XiaoyuZZzz/Stupid-child/blob/7196fd03203d145efcba583fcbaf51fe94c2addb/picture/image-20250706145208264.png)
 
 ### 项目功能介绍
 
