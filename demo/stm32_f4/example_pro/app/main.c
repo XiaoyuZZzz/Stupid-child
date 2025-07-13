@@ -1,5 +1,4 @@
 #include "board.h"
-#include "bsp_uart.h"
 #include <stdio.h>
 
 #include "user_conf.h"
@@ -16,6 +15,4 @@ int main(void)
 		LOG(INFO,GREEN,"file_info\r\n");
 		delay_1ms(500);
 	}
-	
-
 }
