@@ -32,7 +32,7 @@
 #define DEBUG_RTT_BIT       (1 << 1)
 #define DEBUG_UART_BIT      (1 << 2)
 #define DEBUG_FLASH_BIT     (1 << 3)
-#define DEBUG_TARGETS       (DEBUG_UART_BIT)
+#define DEBUG_TARGETS       (DEBUG_FLASH_BIT | DEBUG_UART_BIT)
 
 #if (DEBUG_TARGETS & DEBUG_RTT_BIT) 
 #define ERR_TERMINAL_ID     (0)      
@@ -55,7 +55,63 @@
 
 #endif
 #if (DEBUG_TARGETS & DEBUG_FLASH_BIT) 
+
 #define FLASH_DEBUG_ENABLE
+
+#define SUPPORT_MAX_WRITE_SIZE      (32)                                                //支持最大写入的数据大小
+#define WRITE_FLAG                  (0xAA)                                              //写入标志位
+
+#define FLASH_USER_START_ADDR       (0x08000000ul)                                      // 默认FLASH的起始地址为0x08000000
+#define FLASH_APP_SIZE              (1024 * 100)                                        // 默认FLASH中APP区大小为100K字节
+
+/*如果使用ST芯片，API为擦除扇区，最好是扇区的起始地址，起始地址用来存放一个表格结构体，作为信息管理 */
+/*默认采用的是STM32F4的最后一个扇区作为开发测试 */
+#define FLASH_LOG_START_ADDR		(0x08040000)
+#define FLASH_START_ADDR            (FLASH_LOG_START_ADDR + sizeof(LOG_HEAD))                     // 默认FLASH日志起始地址
+#define FLAHS_SUPPOR_SIZE           (1024 * 6)                                          // 默认FLASH日志支持6K字节的存储
+#define FLASH_SECTOR_SIZE           (FLAHS_SUPPOR_SIZE / 3)                             // 默认每个模块大小为2K字节
+
+/* 用户注册函数 */
+#define FLASH_WRITE_FUNC            mcu_flash_wirte             
+#define FLASH_READ_FUNC             mcu_flash_read
+#define FLASH_ERASE_FUNC            mcu_flash_erase
+
+
+/**错误信息*/
+enum {
+    LOG_OK,
+    LOG_ERROR,
+    LOG_INFO_SIZE_FULL,
+    LOG_ERR_SIZE_FULL,
+    LOG_RAWN_SIZE_FULL,
+    LOG_INFO_FAIL,
+    LOG_ERR_FAIL,
+    LOG_WARN_FAIL,
+    LOG_INFO_INDX_LARGER,
+    LOG_ERR_INDX_LARGER,
+    LOG_WARN_INDX_LARGER,
+};
+
+
+/**日志类型 */
+enum {
+    INFO,
+    ERR,
+    WARN
+};
+
+#define X(name,x)     .name##_log_start_addr =  FLASH_START_ADDR + (x * FLASH_SECTOR_SIZE)   \
+
+#define ADDR_LIST   \
+        X(head, 0   ),          \
+        X(info, INFO),          \
+        X(err,  ERR),           \
+        X(warn, WARN),          \
+
+
+
+
+
 #endif
 #if (DEBUG_TARGETS & NOT_SUPPORT)
 #warning "Debug functionality is disabled"
@@ -103,16 +159,31 @@ void buffer_init(UART_HANDLER uart_handler);
 #endif
 /******************************DRIVER*********************************/
 
+// 默认开启驱动，且开启时是同时支持IIC和SPI
 #define AGREEMENT_ENABLE    (1)
 
 #if AGREEMENT_ENABLE
 #define NOT_AGREEMENT       (1 << 0)
 #define AGREEMENT_SPI       (1 << 1)
 #define AGREEMENT_IIC       (1 << 2)
-#define AGREEMENT_TARGETS   (NOT_AGREEMENT)
+#define AGREEMENT_ALL       (AGREEMENT_SPI | AGREEMENT_IIC)
+#define AGREEMENT_TARGETS   (AGREEMENT_ALL)
+
+#if (AGREEMENT_TARGETS & AGREEMENT_SPI) 
+
 
 #endif
 
+#if (AGREEMENT_TARGETS & AGREEMENT_IIC)
+
+
+#endif
+
+
+
+
+
+#endif
 
 
 

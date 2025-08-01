@@ -9,6 +9,7 @@
 #include "sc_conf.h"
 
 #include <string.h>
+#include <stdarg.h>
 
 /**日志*/
 #if DEBUG_ENABLE
@@ -27,12 +28,6 @@
 #endif
 
 #ifdef UART_DEBUG_ENABLE
-#include <stdarg.h>
-typedef enum {
-    ERR,
-    INFO,
-    WARN
-}LogLevel;
 
 /**需要终端支持ANSI颜色 */
 #define ANSI_COLOR_RED     "\x1b[31m"
@@ -43,22 +38,106 @@ typedef enum {
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
-void log_printf(LogLevel level, const char* format, ...);
+void log_printf(uint8_t level, const char* format, ...);
 #else 
 #define log_printf			((void)0)
 #endif
+
+
 #ifdef FLASH_DEBUG_ENABLE
 
+
+#define ALIGN_4(x) (((x) + 3) & ~0x03)
+
+
+
+/* 便于功能的拓展 */
+typedef struct {
+    uint8_t (*flash_write)(uint32_t addr,uint32_t* write_buff,uint32_t wite_len);
+    uint8_t (*flash_read)(uint32_t addr,uint32_t* read_buff,uint32_t read_len);
+    uint8_t (*flash_earse)(uint32_t addr,uint32_t ears_len);
+}FLASH_OPS;
+
+/*写入的数据包格式*/
+typedef struct {
+    uint32_t timestamp;                             /*时间戳 */
+    uint32_t event_id;                              /*事件id*/
+    uint8_t  data[SUPPORT_MAX_WRITE_SIZE];          /*写入的数据 */
+}LOG_PACK;
+
+
+/*文件头部块，进行信息的管理 */
+typedef struct {
+    FLASH_OPS   ops;                            // Flash操作函数
+    uint32_t head_log_start_addr;               // 日志的起始地址
+    uint32_t info_log_start_addr;               // 信息日志的起始地址
+    uint32_t err_log_start_addr;                // 错误日志的起始地址
+    uint32_t warn_log_start_addr;               // 原始数据的起始地址
+}LOG_HEAD;
+
+
+typedef struct {
+    uint8_t log_info_flag;             	    // 日志是否需要擦除的标志位
+    uint8_t log_err_flag;             		// 日志是否需要擦除的标志位
+    uint8_t log_warn_flag;                  // 日志是否需要擦除的标志位
+    uint8_t log_all_flag;                   // 日志是否需要擦除的标志位
+}CTRL_INFO;
+
+
+/*信息块的内容，对自己的信息进行管理*/
+
+typedef struct {
+    uint32_t    sector_size;                    // 扇区大小(字节)
+    uint32_t    head_offset;                    // 扇区内偏移，应该为下一条数据写入的起始地址
+    uint32_t    log_count;                      // 日志的数量
+}FLASH_MANEGER;
+
+
+/* 日志头部管理信息块初始化 */
+#define CTRL_INIT(name)                         \
+static CTRL_INFO name = {                       \
+    .log_info_flag = WRITE_FLAG,              	\
+    .log_err_flag = WRITE_FLAG,             	\
+    .log_warn_flag = WRITE_FLAG,            	\
+    .log_all_flag = WRITE_FLAG,             	\
+};\
+
+#define HEAD_INIT(name)                         \
+static LOG_HEAD name = {                        \
+    .ops.flash_write = FLASH_WRITE_FUNC,        \
+    .ops.flash_read = FLASH_READ_FUNC,          \
+    .ops.flash_earse = FLASH_ERASE_FUNC,        \
+    ADDR_LIST                                   \
+};\
+
+
+/* 信息块管理初始化 */
+#define MANEGER_INIT(name)                  \
+static FLASH_MANEGER name = {               \
+    .sector_size = FLASH_SECTOR_SIZE,       \
+    .head_offset = 0,                       \
+    .log_count   = 0,                       \
+};\
+
+
+/* 用户使用注册初始化接口 */
+#define COMPONENT_INIT(TYPE,NAME)           \
+        TYPE##_INIT(NAME)                   \
+
+#define MANAGER_SIZE                    sizeof(FLASH_MANEGER)
+
+uint8_t flash_log_init(void);
+uint8_t f_log_write(uint8_t log_type,const char* fmt,...);   
+uint8_t f_log_read(uint8_t log_type,uint8_t indx,LOG_PACK* log_pack);
 #endif
 #else
-#define LOG(name,colro,format, ...)     ((void)0)
+#define flash_log_init  ((void)0)
+#define f_log_write     ((void)0)
+#define f_log_read      ((void)0)
 #endif
 
 
-
-
-
-
+/**RTT、UART走同一个通道，但是flash走其他通道，因为需要支持终端打印*/
 #define LOG(name,color,format, ...)  do{\
     if(DEBUG_TARGETS & DEBUG_RTT_BIT) { \
         LOG_I(\
@@ -70,10 +149,9 @@ void log_printf(LogLevel level, const char* format, ...);
     if(DEBUG_TARGETS & DEBUG_UART_BIT) { \
         log_printf(\
             name,\
-            ANSI_COLOR_##color "[" #name":%s->%s]:%s",__FILE__,__func__, format, \
+            ANSI_COLOR_##color "[" #name":%s->%s]:"format,\
+			__FILE__,__func__,\
             ##__VA_ARGS__);\
-    } \
-    if(DEBUG_TARGETS & DEBUG_FLASH_BIT) { \
     } \
 }while(0);
 

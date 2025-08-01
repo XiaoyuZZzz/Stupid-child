@@ -1,3 +1,10 @@
+/*
+ * @Author       : SuperYu 824229900@qq.com
+ * @Date         : 2025-07-06 16:43
+ * @LastEditors  : SuperYu 824229900@qq.com
+ * @LastEditTime : 2025-07-31 22:50
+ * @Description  : 
+ */
 /**
  * @file: user_conf.h
  * @brief: 用户注册头文件，在此进行注册
@@ -11,9 +18,16 @@
 
 /*内部函数*/
 #include "sc_log.h"
+#include "c_unit.h"
 
 /**用户函数*/
- #include "bsp_uart.h"               /**输入你的文件信息 */
+#include "stm32f4xx.h"
+#include "bsp_uart.h" 
+#include "mcu_flash.h"
+#include "cbtimer.h"
+
+
+/**输入你的文件信息 */
 
 
 
