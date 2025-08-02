@@ -323,10 +323,33 @@ void log_printf(uint8_t level, const char* format, ...) {
 /***********************FLASH日志实现**********************/
 #ifdef FLASH_DEBUG_ENABLE
 COMPONENT_INIT(CTRL,ctrl_info)                          // 初始化控制参数
-COMPONENT_INIT(HEAD,log_head_ctrl)                      // 读取控制参数
-COMPONENT_INIT(MANEGER,info_manager)                    // 信息块管理
-COMPONENT_INIT(MANEGER,err_manager)                     // 错误块管理
-COMPONENT_INIT(MANEGER,warn_manager)                    // 原始数据块管理
+COMPONENT_INIT(HEAD,log_head_ctrl)
+static FLASH_MANEGER info_manager,err_manager,warn_manager;
+
+static void component_init(void) {
+	
+    log_head_ctrl.ops.flash_read = mcu_flash_read;
+    log_head_ctrl.ops.flash_write = mcu_flash_wirte;
+    log_head_ctrl.ops.flash_earse = mcu_flash_erase;
+	log_head_ctrl.info_log_start_addr = FLASH_START_ADDR + sizeof(CTRL_INFO) + (0 * FLASH_SECTOR_SIZE);
+	log_head_ctrl.err_log_start_addr = FLASH_START_ADDR + sizeof(CTRL_INFO) + (1 * FLASH_SECTOR_SIZE);
+	log_head_ctrl.warn_log_start_addr = FLASH_START_ADDR + sizeof(CTRL_INFO) + (2 * FLASH_SECTOR_SIZE);
+	
+            
+    
+    info_manager.sector_size = FLASH_SECTOR_SIZE;
+    info_manager.head_offset = 0;           
+    info_manager.log_count   = 0;              
+             
+    err_manager.sector_size = FLASH_SECTOR_SIZE;
+    err_manager.head_offset = 0;
+    err_manager.log_count   = 0;
+              
+    warn_manager.sector_size = FLASH_SECTOR_SIZE;
+    warn_manager.head_offset = 0;
+    warn_manager.log_count   = 0;
+    
+}
 
 /**
  * @funciton:   uint8_t flash_log_init(void)
@@ -335,29 +358,32 @@ COMPONENT_INIT(MANEGER,warn_manager)                    // 原始数据块管理
  * @retval:     状态
  */
 uint8_t flash_log_init(void) {
+
     uint8_t ret = LOG_OK;
 	/*读取控制块查看是否有文件写入*/
-    log_head_ctrl.ops.flash_read(log_head_ctrl.info_log_start_addr,(uint32_t*)&ctrl_info,sizeof(LOG_HEAD));
+    log_head_ctrl.ops.flash_read(FLASH_START_ADDR,(uint32_t*)&ctrl_info,sizeof(CTRL_INFO));
+	component_init();
     /* 有数据写入则需要更新全局变量 */
     if(ctrl_info.log_info_flag == WRITE_FLAG ) {
 		log_head_ctrl.ops.flash_read(log_head_ctrl.info_log_start_addr,(uint32_t*)&info_manager,sizeof(FLASH_MANEGER));
     }else {
-        LOG(INFO,RED,"flash info log not wirte.\r\n");
-        ret = LOG_INFO_FAIL;
+        // LOG(INFO,RED,"flash info log not wirte.\r\n");
+        // ret = LOG_INFO_FAIL;
+        // return ret;
     }
 
     if(ctrl_info.log_err_flag == WRITE_FLAG ) {
 		log_head_ctrl.ops.flash_read(log_head_ctrl.err_log_start_addr,(uint32_t*)&err_manager,sizeof(FLASH_MANEGER));
     }else {
-        LOG(INFO,RED,"flash err log not wirte.\r\n");
-        ret = LOG_ERR_FAIL;
+        // LOG(INFO,RED,"flash err log not wirte.\r\n");
+        // ret = LOG_ERR_FAIL;
     }
 
     if(ctrl_info.log_warn_flag == WRITE_FLAG ) {
 		log_head_ctrl.ops.flash_read(log_head_ctrl.warn_log_start_addr,(uint32_t*)&warn_manager,sizeof(FLASH_MANEGER));
     }else {
-        LOG(INFO,RED,"flash warn log not wirte.\r\n");
-        ret = LOG_WARN_FAIL;
+        // LOG(INFO,RED,"flash warn log not wirte.\r\n");
+        // ret = LOG_WARN_FAIL;
     }
 
 	return ret;
@@ -375,42 +401,58 @@ uint8_t flash_log_init(void) {
 static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
     LOG_PACK log_pack;          // 写入的数据包
     uint32_t write_start_addr;  //  写入的地址
-    
+    static uint8_t info_count,err_count,warn_count;
+
     uint8_t type_bit = 0;
     uint8_t ret = LOG_OK;
 
+    log_pack.data_len = len;
     log_pack.timestamp = TickVal();
     c_memcpy(log_pack.data,p_data,len);
 
     switch (log_type)
     {
     case INFO :
+
+#if 0
         /* 判断当前写入的地址在扇区范围大小之内 */
         if(info_manager.head_offset <= info_manager.sector_size) {
 
-            type_bit = type_bit << 1;       // 1
+            type_bit = 1;       // 1
 
             info_manager.log_count++;
             log_pack.event_id = info_manager.log_count;
             write_start_addr = log_head_ctrl.info_log_start_addr  + sizeof(FLASH_MANEGER) + info_manager.head_offset;
             
-            log_head_ctrl.ops.flash_write(write_start_addr, (uint32_t*)&log_pack, sizeof(LOG_PACK));
+			// FIXME: @sy   stm32写入是4字节写入，因此在写入算法的时候是默认一个字节的写入，因此里面会乘4，此时应该除以4
+            log_head_ctrl.ops.flash_write(write_start_addr, (uint32_t*)&log_pack, sizeof(LOG_PACK) / 4);
             info_manager.head_offset += sizeof(LOG_PACK);
+			info_manager.sector_size = FLASH_SECTOR_SIZE;
 			/*更新mannager*/
-            ctrl_info.log_info_flag = WRITE_FLAG;
+			// FIXME: 没有意义，stm32写入需要擦除整个块			@sy
+			/*
 			log_head_ctrl.ops.flash_write(log_head_ctrl.info_log_start_addr, 
                                                        (uint32_t*)&info_manager, 
-                                                       sizeof(FLASH_MANEGER));
+                                                       sizeof(FLASH_MANEGER) / 4);
+			*/
         }else {
             ret = LOG_INFO_SIZE_FULL;
         }
+#else 
+        type_bit = 1;       // 1
+        write_start_addr = log_head_ctrl.info_log_start_addr  + sizeof(FLASH_MANEGER) + (info_count++) * sizeof(LOG_PACK);
+        log_pack.event_id = info_count;
+        log_head_ctrl.ops.flash_write(write_start_addr, (uint32_t*)&log_pack, sizeof(LOG_PACK) / 4);
+
+
+#endif
         
         break;
 
     case ERR:
 		if(err_manager.head_offset <= err_manager.sector_size) {
             
-            type_bit = type_bit << 2;       // 2
+            type_bit = 2;       // 2
             
             err_manager.log_count++;
             log_pack.event_id = err_manager.log_count;
@@ -419,7 +461,6 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
             log_head_ctrl.ops.flash_write(write_start_addr, (uint32_t*)&log_pack, sizeof(LOG_PACK));
             err_manager.head_offset += sizeof(LOG_PACK);
 			/*更新mannager*/
-            ctrl_info.log_err_flag = WRITE_FLAG;
 			log_head_ctrl.ops.flash_write(log_head_ctrl.err_log_start_addr, 
                                                        (uint32_t*)&err_manager, 
                                                        sizeof(FLASH_MANEGER));
@@ -432,7 +473,7 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
     case WARN:
         if(warn_manager.head_offset <= warn_manager.sector_size) {
             
-            type_bit = type_bit << 3;   // 4
+            type_bit = 3;   // 4
 
             warn_manager.log_count++;
             log_pack.event_id = warn_manager.log_count;
@@ -441,7 +482,6 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
             log_head_ctrl.ops.flash_write(write_start_addr, (uint32_t*)&log_pack, sizeof(LOG_PACK));
             warn_manager.head_offset += sizeof(LOG_PACK);
 			/*更新mannager*/
-            ctrl_info.log_info_flag = WRITE_FLAG;
 			log_head_ctrl.ops.flash_write(log_head_ctrl.warn_log_start_addr, 
                                                        (uint32_t*)&warn_manager, 
                                                        sizeof(FLASH_MANEGER));
@@ -456,20 +496,24 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
     }
 
     /*更新头部表 */
-    if((type_bit & (0 << 1))) {
+    if(type_bit == 1) {
         /*info */
         if(ctrl_info.log_info_flag != WRITE_FLAG) {
-            log_head_ctrl.ops.flash_write(log_head_ctrl.info_log_start_addr, (uint32_t*)&ctrl_info, sizeof(CTRL_INFO));
+            ctrl_info.log_info_flag = WRITE_FLAG;
+			LOG(INFO,RED,"ctrl_size:%d",sizeof(CTRL_INFO));
+            log_head_ctrl.ops.flash_write(FLASH_START_ADDR, (uint32_t*)&ctrl_info, (sizeof(CTRL_INFO) / 4));
         }
-    }else if((type_bit & (0 << 2))) {
+    }else if(type_bit == 2) {
         /*err*/
         if(ctrl_info.log_err_flag != WRITE_FLAG) {
-            log_head_ctrl.ops.flash_write(log_head_ctrl.err_log_start_addr, (uint32_t*)&ctrl_info, sizeof(CTRL_INFO));
+            ctrl_info.log_err_flag = WRITE_FLAG;
+            log_head_ctrl.ops.flash_write(FLASH_START_ADDR, (uint32_t*)&ctrl_info, sizeof(CTRL_INFO));
         }
-    }else if((type_bit & (0 << 3))) {
+    }else if(type_bit ==  3) {
         /*warn*/
         if(ctrl_info.log_warn_flag != WRITE_FLAG) {
-            log_head_ctrl.ops.flash_write(log_head_ctrl.warn_log_start_addr, (uint32_t*)&ctrl_info, sizeof(CTRL_INFO));
+            ctrl_info.log_info_flag = WRITE_FLAG;
+            log_head_ctrl.ops.flash_write(FLASH_START_ADDR, (uint32_t*)&ctrl_info, sizeof(CTRL_INFO));
         }
     }
 
@@ -488,7 +532,7 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
  * @retval:     写入状态
  */
 uint8_t f_log_write(uint8_t log_type,const char* fmt,...) {
-    char w_buffer[SUPPORT_MAX_WRITE_SIZE];
+    char w_buffer[SUPPORT_MAX_WRITE_SIZE] = {0};
     uint8_t ret = LOG_OK;
     uint16_t buf_size;
 	
@@ -505,29 +549,29 @@ uint8_t f_log_write(uint8_t log_type,const char* fmt,...) {
 
 
 /**
- * @funciton:       f_log_read
+ * @funciton:       base_log_read
  * @breif:          日志读取
  * @param[in]:      读取的日志类型
  * @param[in]:      需要读取的索引
  * @retval：        读取的状态
  */
 uint8_t f_log_read(uint8_t log_type,uint8_t indx,LOG_PACK* log_pack) {
+    uint32_t primask = __get_PRIMASK();
 	uint8_t ret = LOG_OK;
-
+	uint32_t temp_addr;
     switch(log_type) {
         case INFO:
         if(indx > info_manager.log_count) {
             ret = LOG_INFO_INDX_LARGER;
-            goto err;
+            return  ret;
         }
-        log_head_ctrl.ops.flash_read(log_head_ctrl.info_log_start_addr + (indx * MANAGER_SIZE),
-                                                                        (uint32_t*)log_pack,
-                                                                        sizeof(LOG_PACK));
+		temp_addr = log_head_ctrl.info_log_start_addr +   MANAGER_SIZE + (indx * sizeof(LOG_PACK));
+        log_head_ctrl.ops.flash_read(temp_addr,(uint32_t*)log_pack,sizeof(LOG_PACK));
         break;
         case ERR:
         if(indx > err_manager.log_count) {
             ret = LOG_ERR_INDX_LARGER;
-            goto err;
+            return  ret;
         }
         log_head_ctrl.ops.flash_read(log_head_ctrl.err_log_start_addr + (indx * MANAGER_SIZE),
                                                                         (uint32_t*)log_pack,
@@ -536,7 +580,7 @@ uint8_t f_log_read(uint8_t log_type,uint8_t indx,LOG_PACK* log_pack) {
         case WARN:
         if(indx > warn_manager.log_count) {
             ret = LOG_WARN_INDX_LARGER;
-            goto err;
+            return  ret;
         }
         log_head_ctrl.ops.flash_read(log_head_ctrl.warn_log_start_addr + (indx * MANAGER_SIZE),
                                                                         (uint32_t*)log_pack,
@@ -545,7 +589,7 @@ uint8_t f_log_read(uint8_t log_type,uint8_t indx,LOG_PACK* log_pack) {
         default:
         break;
     }
-err:
+    __set_PRIMASK(primask);  // 恢复原始中断状态
 	return ret;
 }
 

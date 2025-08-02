@@ -47,8 +47,6 @@ void log_printf(uint8_t level, const char* format, ...);
 #ifdef FLASH_DEBUG_ENABLE
 
 
-#define ALIGN_4(x) (((x) + 3) & ~0x03)
-
 
 
 /* 便于功能的拓展 */
@@ -59,17 +57,17 @@ typedef struct {
 }FLASH_OPS;
 
 /*写入的数据包格式*/
-typedef struct {
-    uint32_t timestamp;                             /*时间戳 */
-    uint32_t event_id;                              /*事件id*/
-    uint8_t  data[SUPPORT_MAX_WRITE_SIZE];          /*写入的数据 */
-}LOG_PACK;
+typedef struct __attribute__((aligned(4))) {
+    uint32_t timestamp;
+    uint32_t event_id;
+    uint32_t data_len;
+    uint8_t  data[SUPPORT_MAX_WRITE_SIZE];
+} LOG_PACK;
 
 
 /*文件头部块，进行信息的管理 */
 typedef struct {
-    FLASH_OPS   ops;                            // Flash操作函数
-    uint32_t head_log_start_addr;               // 日志的起始地址
+    FLASH_OPS   ops;                           // Flash操作函数
     uint32_t info_log_start_addr;               // 信息日志的起始地址
     uint32_t err_log_start_addr;                // 错误日志的起始地址
     uint32_t warn_log_start_addr;               // 原始数据的起始地址
@@ -78,19 +76,27 @@ typedef struct {
 
 typedef struct {
     uint8_t log_info_flag;             	    // 日志是否需要擦除的标志位
-    uint8_t log_err_flag;             		// 日志是否需要擦除的标志位
-    uint8_t log_warn_flag;                  // 日志是否需要擦除的标志位
-    uint8_t log_all_flag;                   // 日志是否需要擦除的标志位
+    uint8_t log_err_flag;             			// 日志是否需要擦除的标志位
+    uint8_t log_warn_flag;                  	// 日志是否需要擦除的标志位
+    uint8_t log_all_flag;                   	// 日志是否需要擦除的标志位
 }CTRL_INFO;
 
 
 /*信息块的内容，对自己的信息进行管理*/
 
-typedef struct {
+typedef struct ALIGN_4 {
     uint32_t    sector_size;                    // 扇区大小(字节)
     uint32_t    head_offset;                    // 扇区内偏移，应该为下一条数据写入的起始地址
-    uint32_t    log_count;                      // 日志的数量
+    uint8_t    log_count;                       // 日志的数量
 }FLASH_MANEGER;
+
+
+#define X(name,x)     .name##_log_start_addr =  FLASH_START_ADDR + sizeof(CTRL_INFO) + (x * FLASH_SECTOR_SIZE) 
+
+#define ADDR_LIST               \
+        X(info, INFO),          \
+        X(err,  ERR),          \
+        X(warn, WARN),          \
 
 
 /* 日志头部管理信息块初始化 */
@@ -100,15 +106,15 @@ static CTRL_INFO name = {                       \
     .log_err_flag = WRITE_FLAG,             	\
     .log_warn_flag = WRITE_FLAG,            	\
     .log_all_flag = WRITE_FLAG,             	\
-};\
+};
 
 #define HEAD_INIT(name)                         \
 static LOG_HEAD name = {                        \
-    .ops.flash_write = FLASH_WRITE_FUNC,        \
-    .ops.flash_read = FLASH_READ_FUNC,          \
-    .ops.flash_earse = FLASH_ERASE_FUNC,        \
+	.ops.flash_read = mcu_flash_read,\
+	.ops.flash_write = mcu_flash_wirte,\
+	.ops.flash_earse = mcu_flash_erase,\
     ADDR_LIST                                   \
-};\
+};
 
 
 /* 信息块管理初始化 */
@@ -117,7 +123,7 @@ static FLASH_MANEGER name = {               \
     .sector_size = FLASH_SECTOR_SIZE,       \
     .head_offset = 0,                       \
     .log_count   = 0,                       \
-};\
+};
 
 
 /* 用户使用注册初始化接口 */

@@ -1,6 +1,13 @@
+/*
+ * @Author       : SuperYu 824229900@qq.com
+ * @Date         : 2025-07-23 22:50
+ * @LastEditors  : SuperYu 824229900@qq.com
+ * @LastEditTime : 2025-08-03 01:03
+ * @Description  : 
+ */
 #include "time_tick.h"
 
-static uint32_t heart_tick_time = 0;
+volatile uint32_t heart_tick_time = 0;
 
 void tick_timer_init(void) {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);
@@ -9,8 +16,8 @@ void tick_timer_init(void) {
 
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseStructure.TIM_Period = 10000;
-	TIM_TimeBaseStructure.TIM_Prescaler = 8400 - 1;
+	TIM_TimeBaseStructure.TIM_Period = 1000 - 1;
+	TIM_TimeBaseStructure.TIM_Prescaler = 84 - 1;
 	
 	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -23,12 +30,15 @@ void tick_timer_init(void) {
 	TIM_Cmd(TIM3,ENABLE);
 }
 
-void TIM3_IRQHandler(void)
-{
-    if(TIM_GetITStatus(TIM3, TIM_IT_Update) == SET){
+void TIM3_IRQHandler(void) {
+    if(TIM_GetITStatus(TIM3, TIM_IT_Update)) {
+        uint32_t primask = __get_PRIMASK();
+        __disable_irq();
         heart_tick_time++;
+        __set_PRIMASK(primask);
+        
+        TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
     }
-    TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 }
 
 uint32_t get_heart_tick_time(void) {

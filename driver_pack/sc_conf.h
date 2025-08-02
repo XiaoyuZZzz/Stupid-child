@@ -17,6 +17,13 @@
  * 支持DEBUG_RTT、DEBUG_UART、DEBUG_FLASH
  * TODO:目前只支持前两个调试方法
  */
+
+ #ifdef _WIN32
+    #define ALIGN_4 __declspec(align(4))
+#else
+    #define ALIGN_4 __attribute__((aligned(4))) 
+#endif
+
 #define DEBUG_ENABLE    (1)
 /* 
  * |DEBUG_ENABLE
@@ -26,6 +33,15 @@
  * |-->DEBUG_FLASH
  * |-->warning message
  */
+
+ /**日志类型 */
+enum {
+    INFO,
+    ERR,
+    WARN
+};
+
+
 // TODO:日志部分调试完成之后需要修改成NOT_SUPPORT
 #if DEBUG_ENABLE
 #define NOT_SUPPORT         (1 << 0)
@@ -58,7 +74,7 @@
 
 #define FLASH_DEBUG_ENABLE
 
-#define SUPPORT_MAX_WRITE_SIZE      (32)                                                //支持最大写入的数据大小
+#define SUPPORT_MAX_WRITE_SIZE      (16)                                                //支持最大写入的数据大小
 #define WRITE_FLAG                  (0xAA)                                              //写入标志位
 
 #define FLASH_USER_START_ADDR       (0x08000000ul)                                      // 默认FLASH的起始地址为0x08000000
@@ -67,14 +83,14 @@
 /*如果使用ST芯片，API为擦除扇区，最好是扇区的起始地址，起始地址用来存放一个表格结构体，作为信息管理 */
 /*默认采用的是STM32F4的最后一个扇区作为开发测试 */
 #define FLASH_LOG_START_ADDR		(0x08040000)
-#define FLASH_START_ADDR            (FLASH_LOG_START_ADDR + sizeof(LOG_HEAD))                     // 默认FLASH日志起始地址
+#define FLASH_START_ADDR            (FLASH_LOG_START_ADDR )           					// 默认FLASH日志起始地址
 #define FLAHS_SUPPOR_SIZE           (1024 * 6)                                          // 默认FLASH日志支持6K字节的存储
 #define FLASH_SECTOR_SIZE           (FLAHS_SUPPOR_SIZE / 3)                             // 默认每个模块大小为2K字节
 
 /* 用户注册函数 */
-#define FLASH_WRITE_FUNC            mcu_flash_wirte             
-#define FLASH_READ_FUNC             mcu_flash_read
-#define FLASH_ERASE_FUNC            mcu_flash_erase
+#define FLASH_WRITE_FUNC            (mcu_flash_wirte)           
+#define FLASH_READ_FUNC             (mcu_flash_read)
+#define FLASH_ERASE_FUNC            (mcu_flash_erase)
 
 
 /**错误信息*/
@@ -92,21 +108,6 @@ enum {
     LOG_WARN_INDX_LARGER,
 };
 
-
-/**日志类型 */
-enum {
-    INFO,
-    ERR,
-    WARN
-};
-
-#define X(name,x)     .name##_log_start_addr =  FLASH_START_ADDR + (x * FLASH_SECTOR_SIZE)   \
-
-#define ADDR_LIST   \
-        X(head, 0   ),          \
-        X(info, INFO),          \
-        X(err,  ERR),           \
-        X(warn, WARN),          \
 
 
 
@@ -128,11 +129,7 @@ enum {
 #define PUSH_CHAR               (1)
 #define PUSH_STRING             (0)
 /**环形缓冲数组 */
-#ifdef _WIN32
-    #define ALIGN_4 __declspec(align(4))
-#else
-    #define ALIGN_4 __attribute__((aligned(4))) 
-#endif
+
 
 #define RINGBUFFER_DECLARE(name)\
     struct ALIGN_4 name##_type {   \

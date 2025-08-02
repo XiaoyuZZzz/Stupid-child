@@ -2,7 +2,7 @@
  * @Author       : 824229900@qq.com
  * @Date         : 2025-07-18 21:32
  * @LastEditors  : SuperYu 824229900@qq.com
- * @LastEditTime : 2025-08-01 21:53
+ * @LastEditTime : 2025-08-03 02:33
  * @Description  : 
  */
 #include "mcu_flash.h"
@@ -148,14 +148,21 @@ uint8_t mcu_flash_wirte(uint32_t addr,uint32_t* data,uint32_t size) {
  * @param[in]:  uint32_t size   读取的大小
  * @retval:     读取状态
  */
-uint8_t mcu_flash_read(uint32_t addr,uint32_t* buffer,uint32_t size) {
-    uint32_t i;
-	for(i = 0;i < size; i++)
-	{
-		buffer[i]=mcu_flash_read_data(addr);		//读取4个字节.
-		addr += 4;									//偏移4个字节.	
-	}
-	return CODE_SUCESS;
+// 修改函数原型和实现
+uint8_t mcu_flash_read(uint32_t addr, uint32_t* buffer, uint32_t byte_size) {
+    // 确保地址和缓冲区4字节对齐
+    if((addr & 0x3) != 0 || ((uintptr_t)buffer & 0x3) != 0) {
+        return CODE_ERROR;
+    }
+    
+    uint32_t word_count = (byte_size + 3) / 4; // 向上取整
+    uint32_t* buf_ptr = (uint32_t*)buffer;
+    
+    for(uint32_t i = 0; i < word_count; i++) {
+        buf_ptr[i] = *(volatile uint32_t*)addr;
+        addr += 4;
+    }
+    return CODE_SUCESS;
 }
 
 

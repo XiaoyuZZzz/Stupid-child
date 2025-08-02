@@ -4,8 +4,14 @@
 #define TIME_MAX   0xfffffffful
 #endif
 
+extern volatile uint32_t heart_tick_time;
+
 uint32_t TickVal(void) {
-	return get_heart_tick_time();
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    uint32_t val = heart_tick_time;
+    __set_PRIMASK(primask);
+    return val;
 }
 
 static struct cbtimer head = { .next = NULL, .state = TIMER_STOP };
