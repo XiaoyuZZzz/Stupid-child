@@ -48,7 +48,8 @@ enum {
 #define DEBUG_RTT_BIT       (1 << 1)
 #define DEBUG_UART_BIT      (1 << 2)
 #define DEBUG_FLASH_BIT     (1 << 3)
-#define DEBUG_TARGETS       (DEBUG_FLASH_BIT | DEBUG_UART_BIT)
+#define DEBG_ALL_BIT        (DEBUG_UART_BIT | DEBUG_RTT_BIT | DEBUG_FLASH_BIT)
+#define DEBUG_TARGETS       (DEBG_ALL_BIT)
 
 #if (DEBUG_TARGETS & DEBUG_RTT_BIT) 
 #define ERR_TERMINAL_ID     (0)      

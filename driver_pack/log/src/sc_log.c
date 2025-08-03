@@ -334,8 +334,6 @@ static void component_init(void) {
 	log_head_ctrl.info_log_start_addr = FLASH_START_ADDR + sizeof(CTRL_INFO) + (0 * FLASH_SECTOR_SIZE);
 	log_head_ctrl.err_log_start_addr = FLASH_START_ADDR + sizeof(CTRL_INFO) + (1 * FLASH_SECTOR_SIZE);
 	log_head_ctrl.warn_log_start_addr = FLASH_START_ADDR + sizeof(CTRL_INFO) + (2 * FLASH_SECTOR_SIZE);
-	
-            
     
     info_manager.sector_size = FLASH_SECTOR_SIZE;
     info_manager.head_offset = 0;           
@@ -360,31 +358,26 @@ static void component_init(void) {
 uint8_t flash_log_init(void) {
 
     uint8_t ret = LOG_OK;
+#if 0
 	/*读取控制块查看是否有文件写入*/
     log_head_ctrl.ops.flash_read(FLASH_START_ADDR,(uint32_t*)&ctrl_info,sizeof(CTRL_INFO));
-	component_init();
     /* 有数据写入则需要更新全局变量 */
     if(ctrl_info.log_info_flag == WRITE_FLAG ) {
 		log_head_ctrl.ops.flash_read(log_head_ctrl.info_log_start_addr,(uint32_t*)&info_manager,sizeof(FLASH_MANEGER));
-    }else {
-        // LOG(INFO,RED,"flash info log not wirte.\r\n");
-        // ret = LOG_INFO_FAIL;
-        // return ret;
     }
 
     if(ctrl_info.log_err_flag == WRITE_FLAG ) {
 		log_head_ctrl.ops.flash_read(log_head_ctrl.err_log_start_addr,(uint32_t*)&err_manager,sizeof(FLASH_MANEGER));
-    }else {
-        // LOG(INFO,RED,"flash err log not wirte.\r\n");
-        // ret = LOG_ERR_FAIL;
     }
 
     if(ctrl_info.log_warn_flag == WRITE_FLAG ) {
 		log_head_ctrl.ops.flash_read(log_head_ctrl.warn_log_start_addr,(uint32_t*)&warn_manager,sizeof(FLASH_MANEGER));
-    }else {
-        // LOG(INFO,RED,"flash warn log not wirte.\r\n");
-        // ret = LOG_WARN_FAIL;
     }
+#else
+
+    component_init();
+
+#endif
 
 	return ret;
 }   
@@ -450,6 +443,7 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
         break;
 
     case ERR:
+#if 0
 		if(err_manager.head_offset <= err_manager.sector_size) {
             
             type_bit = 2;       // 2
@@ -467,10 +461,20 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
         }else {
             ret = LOG_ERR_SIZE_FULL;
         }
+#else
+
+        type_bit = 2;
+        write_start_addr = log_head_ctrl.err_log_start_addr  + sizeof(FLASH_MANEGER) + (err_count++) * sizeof(LOG_PACK);
+        log_pack.event_id = err_count;
+        log_head_ctrl.ops.flash_write(write_start_addr, (uint32_t*)&log_pack, sizeof(LOG_PACK) / 4);
+
+
+#endif
 
         break;
 
     case WARN:
+#if 0
         if(warn_manager.head_offset <= warn_manager.sector_size) {
             
             type_bit = 3;   // 4
@@ -488,6 +492,13 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
         }else {
             ret = LOG_RAWN_SIZE_FULL;
         }
+#else 
+
+        type_bit = 3;
+        write_start_addr = log_head_ctrl.warn_log_start_addr  + sizeof(FLASH_MANEGER) + (warn_count++) * sizeof(LOG_PACK);
+        log_pack.event_id = warn_count;
+        log_head_ctrl.ops.flash_write(write_start_addr, (uint32_t*)&log_pack, sizeof(LOG_PACK) / 4);
+#endif
 
         break;
     default:
@@ -495,12 +506,12 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
         break;
     }
 
+#if 0
     /*更新头部表 */
     if(type_bit == 1) {
         /*info */
         if(ctrl_info.log_info_flag != WRITE_FLAG) {
             ctrl_info.log_info_flag = WRITE_FLAG;
-			LOG(INFO,RED,"ctrl_size:%d",sizeof(CTRL_INFO));
             log_head_ctrl.ops.flash_write(FLASH_START_ADDR, (uint32_t*)&ctrl_info, (sizeof(CTRL_INFO) / 4));
         }
     }else if(type_bit == 2) {
@@ -516,7 +527,7 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
             log_head_ctrl.ops.flash_write(FLASH_START_ADDR, (uint32_t*)&ctrl_info, sizeof(CTRL_INFO));
         }
     }
-
+#endif
 
 	return ret;
 

@@ -20,7 +20,7 @@
 #define LOG_I(ID,Index,sFormat,...) do{\
     SEGGER_RTT_SetTerminal(ID);\
     SEGGER_RTT_printf(Index,sFormat);\
-    SEGGER_RTT_printf(Index,"[:%s->%s],%s ",__FILE__,__func__, ##__VA_ARGS__);\
+    SEGGER_RTT_printf(Index,"[" #ID":%s->%s],%s ",__FILE__,__func__, ##__VA_ARGS__);\
 }while(0);
 
 #else 
@@ -39,8 +39,16 @@
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
 void log_printf(uint8_t level, const char* format, ...);
+#define LOG_PRINTF(name,color,format,...) do {\
+    log_printf(\
+            name,\
+            ANSI_COLOR_##color "[" #name":%s->%s]:"format,\
+			__FILE__,__func__,\
+            ##__VA_ARGS__);\
+}while(0);
+
 #else 
-#define log_printf			((void)0)
+#define LOG_PRINTF(name,color,format,...)			((void)0)
 #endif
 
 
@@ -75,7 +83,7 @@ typedef struct {
 
 
 typedef struct {
-    uint8_t log_info_flag;             	    // 日志是否需要擦除的标志位
+    uint8_t log_info_flag;             	        // 日志是否需要擦除的标志位
     uint8_t log_err_flag;             			// 日志是否需要擦除的标志位
     uint8_t log_warn_flag;                  	// 日志是否需要擦除的标志位
     uint8_t log_all_flag;                   	// 日志是否需要擦除的标志位
@@ -153,9 +161,9 @@ uint8_t f_log_read(uint8_t log_type,uint8_t indx,LOG_PACK* log_pack);
             ##__VA_ARGS__); \
     } \
     if(DEBUG_TARGETS & DEBUG_UART_BIT) { \
-        log_printf(\
+        LOG_PRINTF(\
             name,\
-            ANSI_COLOR_##color "[" #name":%s->%s]:"format,\
+            color format,\
 			__FILE__,__func__,\
             ##__VA_ARGS__);\
     } \
