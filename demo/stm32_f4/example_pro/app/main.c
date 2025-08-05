@@ -50,15 +50,17 @@ int main(void)
 	uart1_init(115200U);	
 	tick_timer_init();
 	//flash_log_init();
+	uint32_t i = 2;
+	uint8_t z = 10;
 	
 	//cbtimer_start(&cb1_timer,5000,NULL,cbtimer1_callback);
 	//cbtimer_start(&cb2_timer,3000,NULL,cbtimer2_callback);
 	while(1)
 	{
 		//cbtimer_poll();
-		LOG(INFO,YELLOW,"log_read\r\n");
+		LOG(INFO,YELLOW,"log_read:%d\r\n",i);
 		delay_ms(1000);
-		LOG(INFO,RED,"log_read\r\n");
+		LOG(INFO,RED,"log_read:%x\r\n",z);
 		delay_ms(1000);
 		LOG(INFO,GREEN,"log_read\r\n");
 		delay_ms(1000);

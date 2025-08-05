@@ -17,11 +17,22 @@
 #ifdef RTT_DEBUG_ENABLE
 #include "SEGGER_RTT.h"
 
+/*是否开启具体的路径*/
+#if LOG_PATH_ENABLE
 #define LOG_I(ID,Index,sFormat,...) do{\
     SEGGER_RTT_SetTerminal(ID);\
-    SEGGER_RTT_printf(Index,sFormat);\
-    SEGGER_RTT_printf(Index,"[" #ID":%s->%s],%s ",__FILE__,__func__, ##__VA_ARGS__);\
+    SEGGER_RTT_printf(Index,"[" #ID":%s->%s]:"sFormat,\
+	__FILE__,__func__,\
+	##__VA_ARGS__);\
 }while(0);
+#else
+#define LOG_I(ID,Index,sFormat,...) do{\
+    SEGGER_RTT_SetTerminal(ID);\
+    SEGGER_RTT_printf(Index,"[" #ID":]:"sFormat,\
+	##__VA_ARGS__);\
+}while(0);
+
+#endif
 
 #else 
 #define LOG_I(ID,Index,sFormat,...)  ((void)0)
@@ -39,6 +50,7 @@
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
 void log_printf(uint8_t level, const char* format, ...);
+#if LOG_PATH_ENABLE
 #define LOG_PRINTF(name,color,format,...) do {\
     log_printf(\
             name,\
@@ -46,6 +58,14 @@ void log_printf(uint8_t level, const char* format, ...);
 			__FILE__,__func__,\
             ##__VA_ARGS__);\
 }while(0);
+#else
+#define LOG_PRINTF(name,color,format,...) do {\
+    log_printf(\
+            name,\
+            ANSI_COLOR_##color "[" #name":]"format,\
+            ##__VA_ARGS__);\
+}while(0);
+#endif
 
 #else 
 #define LOG_PRINTF(name,color,format,...)			((void)0)
@@ -152,7 +172,7 @@ uint8_t f_log_read(uint8_t log_type,uint8_t indx,LOG_PACK* log_pack);
 
 
 /**RTT、UART走同一个通道，但是flash走其他通道，因为需要支持终端打印*/
-#define LOG(name,color,format, ...)  do{\
+#define LOG(name,color,format,...)  do{\
     if(DEBUG_TARGETS & DEBUG_RTT_BIT) { \
         LOG_I(\
             name##_TERMINAL_ID, \
@@ -163,8 +183,8 @@ uint8_t f_log_read(uint8_t log_type,uint8_t indx,LOG_PACK* log_pack);
     if(DEBUG_TARGETS & DEBUG_UART_BIT) { \
         LOG_PRINTF(\
             name,\
-            color format,\
-			__FILE__,__func__,\
+            color,\
+            format,\
             ##__VA_ARGS__);\
     } \
 }while(0);

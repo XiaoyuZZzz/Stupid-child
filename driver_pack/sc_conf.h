@@ -33,6 +33,7 @@
  * |-->DEBUG_FLASH
  * |-->warning message
  */
+#define LOG_PATH_ENABLE                 (0)         // 是否开启文件路径及函数调用
 
  /**日志类型 */
 enum {
@@ -109,11 +110,6 @@ enum {
     LOG_WARN_INDX_LARGER,
 };
 
-
-
-
-
-
 #endif
 #if (DEBUG_TARGETS & NOT_SUPPORT)
 #warning "Debug functionality is disabled"
@@ -164,15 +160,21 @@ void buffer_init(UART_HANDLER uart_handler);
 #define NOT_AGREEMENT       (1 << 0)
 #define AGREEMENT_SPI       (1 << 1)
 #define AGREEMENT_IIC       (1 << 2)
-#define AGREEMENT_ALL       (AGREEMENT_SPI | AGREEMENT_IIC)
+#define AGREEMENT_ALL       (AGREEMENT_IIC)
 #define AGREEMENT_TARGETS   (AGREEMENT_ALL)
 
 #if (AGREEMENT_TARGETS & AGREEMENT_SPI) 
+
+#define AGREEMENT_SPI_ENABLE
 
 
 #endif
 
 #if (AGREEMENT_TARGETS & AGREEMENT_IIC)
+#define AGREEMENT_IIC_ENABLE
+
+
+#define SSD1306_ENABLE              (1)
 
 
 #endif
