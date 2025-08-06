@@ -11,13 +11,43 @@
 /************************************环形缓冲区*******************************/
 RINGBUFFER_DECLARE(RING_BUFFER);
 
+
+uint16_t get_ring_buffer_front(void) {
+    return RING_BUFFER.front;
+}
+
+uint16_t get_ring_buffer_tail(void) {
+    return RING_BUFFER.tail;
+}
+
+void update_ring_buffer_front(uint16_t data) {
+    RING_BUFFER.front = data;
+}
+
+void update_ring_buffer_tail(uint16_t data) {
+    RING_BUFFER.tail = data;
+}
+
+void set_ring_buffer_rec_len(uint16_t len) {
+    RING_BUFFER.rec_data_len = len;
+}
+
+uint16_t get_ring_buffer_rec_len(void) {
+    return RING_BUFFER.rec_data_len;
+}
+
+uint8_t* get_ringbuffer(void) {
+    return(uint8_t*)&RING_BUFFER.ring_buffer;
+}
+
 /**
  * @function:   void ring_buffer_init(void)
  * @breif:      环形缓冲区初始化
  */
 static void ring_buffer_init(void) {
-    RING_BUFFER.font = 0;
+    RING_BUFFER.rec_data_len = 0;
     RING_BUFFER.tail = 0;
+    RING_BUFFER.front = 0;
 
     memset(RING_BUFFER.ring_buffer,0,sizeof(RING_BUFFER.ring_buffer));
 }
@@ -27,20 +57,20 @@ static void ring_buffer_init(void) {
  * @function: uint8_t is_empty(void)
  * @breif:    环形缓冲区是否为空
  */
- static uint8_t is_empty(void) {
-    return (RING_BUFFER.font == RING_BUFFER.tail) ? 1 :0;
+uint8_t is_empty(void) {
+    return (RING_BUFFER.front == RING_BUFFER.tail) ? 1 :0;
  }
 
  /**
   * @function: uint8_t push_buffer(uint8_t data)
   * @brief  :  入队
   */
- static uint8_t push_buffer(uint8_t data) {
-    if ((RING_BUFFER.font + 1) % RING_BUFFER_SIZE == RING_BUFFER.tail) {
+static uint8_t push_buffer(uint8_t data) {
+    if ((RING_BUFFER.front + 1) % RING_BUFFER_SIZE == RING_BUFFER.tail) {
         return BUFFER_ERROR;
     }
-    RING_BUFFER.ring_buffer[RING_BUFFER.font] = data;
-    RING_BUFFER.font = (RING_BUFFER.font + 1) % RING_BUFFER_SIZE;
+    RING_BUFFER.ring_buffer[RING_BUFFER.front] = data;
+    RING_BUFFER.front = (RING_BUFFER.front + 1) % RING_BUFFER_SIZE;
     return BUFFER_SUCCESS;
  }
 
@@ -50,7 +80,7 @@ static void ring_buffer_init(void) {
   */
 
 static uint8_t pop_buffer(uint8_t* data) {
-    if (RING_BUFFER.font == RING_BUFFER.tail) {
+    if (RING_BUFFER.front == RING_BUFFER.tail) {
         return BUFFER_ERROR;
     }
     *data = RING_BUFFER.ring_buffer[RING_BUFFER.tail];
@@ -94,30 +124,66 @@ uint8_t pop_one_char(uint8_t* data) {
  * @retval:     0-error 1-success
  * @note:       调试功能默认不开启
  */
-uint8_t push_string(uint8_t* data,uint16_t len) {
-    uint16_t push_len;
-    uint8_t push_status;            // 入队状态
-    for(push_len = 0; push_len < len; push_len++) {
-        push_status = push_one_char(data[push_len]);
-        if(push_status == BUFFER_ERROR) {
-            goto ret;
+uint8_t push_string(uint8_t* data, uint16_t len) {
+    // 检查可用空间
+    uint16_t free_space = (RING_BUFFER.tail - RING_BUFFER.front - 1 + RING_BUFFER_SIZE) % RING_BUFFER_SIZE;
+    if (len > free_space) {
+        return BUFFER_ERROR; // 空间不足
+    }
+
+    // 高效拷贝（考虑回绕）
+    if (RING_BUFFER.front + len < RING_BUFFER_SIZE) {
+        c_memcpy(&RING_BUFFER.ring_buffer[RING_BUFFER.front], data, len);
+        RING_BUFFER.front = (RING_BUFFER.front + len) % RING_BUFFER_SIZE;
+    } else {
+        uint16_t first_segment = RING_BUFFER_SIZE - RING_BUFFER.front;
+        c_memcpy(&RING_BUFFER.ring_buffer[RING_BUFFER.front], data, first_segment);
+        c_memcpy(RING_BUFFER.ring_buffer, data + first_segment, len - first_segment);
+        RING_BUFFER.front = len - first_segment;
+    }
+    return BUFFER_SUCCESS;
+}
+
+static uint16_t get_data(uint8_t* dest, uint16_t max_len) {
+    uint16_t bytes_available = 0;
+    uint16_t bytes_to_copy = 0;
+    uint16_t read_valnum = 0;
+    
+    // 计算可用数据量
+    if(RING_BUFFER.front >= RING_BUFFER.tail) {
+        bytes_available = RING_BUFFER.front - RING_BUFFER.tail;
+    } else {
+        bytes_available = RING_BUFFER_SIZE - RING_BUFFER.tail + RING_BUFFER.front;
+    }
+    
+    
+    // 确定实际可读取的数据量
+    bytes_to_copy = (bytes_available > max_len) ? max_len : bytes_available;
+
+    while(bytes_to_copy--) {
+        if(pop_one_char(dest) == BUFFER_SUCCESS) {
+            dest++;
+            read_valnum++;
+        } else {
+            break;  
         }
     }
-    push_status = BUFFER_SUCCESS;
-ret : 
-    return push_status;
+
+    return read_valnum;
 }
 
 
 /**提供顶部的注册接口设计*/
 /**回调函数内容 */
-void buffer_init(UART_HANDLER uart_handler) {
-    uart_handler.init = ring_buffer_init;
+void buffer_init(UART_HANDLER* uart_handler) {
+    ring_buffer_init();
+    uart_handler->init = ring_buffer_init;
 #if PUSH_CHAR
-    uart_handler.push = push_one_char;
+    uart_handler->push = push_one_char;
 #elif PUSH_STRING
-    uart_handler.push = push_string;
+    uart_handler->push = push_string;
 #endif
+	uart_handler->get_data = get_data;
 }
 
 #endif

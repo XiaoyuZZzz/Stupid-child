@@ -11,6 +11,44 @@
 #include <string.h>
 #include <stdarg.h>
 
+#if RING_BUFFER_ENABLE
+/**环形缓冲数组 */
+#define RINGBUFFER_DECLARE(name)\
+    struct ALIGN_4 name##_TYPE {   \
+        uint16_t      rec_data_len;\
+        uint8_t       ring_buffer[RING_BUFFER_SIZE];\
+		uint16_t      front;\
+        uint16_t      tail;\
+    } name
+
+enum {
+    BUFFER_ERROR,
+    BUFFER_SUCCESS
+};  
+
+typedef struct {
+    void(*init)(void);              /**初始化*/
+#if PUSH_CHAR
+    uint8_t(*push)(uint8_t data);      /**单字节写入*/
+#elif PUSH_STRING
+    uint8_t(*push)(uint8_t* data,uint16_t len);    /**多字节写入*/
+#endif
+    uint16_t(*get_data)(uint8_t* dest, uint16_t max_len);   /*读取环形缓冲区的数据 */
+}UART_HANDLER;
+
+
+void update_ring_buffer_front(uint16_t data);
+void update_ring_buffer_tail(uint16_t data);
+uint16_t get_ring_buffer_front(void);
+uint16_t get_ring_buffer_tail(void);
+void set_ring_buffer_rec_len(uint16_t len);
+uint16_t get_ring_buffer_rec_len(void);
+uint8_t* get_ringbuffer(void);
+void buffer_init(UART_HANDLER* uart_handler);
+uint8_t is_empty(void);
+uint8_t pop_one_char(uint8_t* data);
+#endif
+
 /**日志*/
 #if DEBUG_ENABLE
 

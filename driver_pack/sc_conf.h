@@ -117,39 +117,15 @@ enum {
 
 #endif
 /***********************RING_BUFFER******************************/
-#define RING_BUFFER_ENABLE     (0)
+#define RING_BUFFER_ENABLE     (1)
 #if RING_BUFFER_ENABLE
 
 /**设置环形缓冲区的大小*/
-#define RING_BUFFER_SIZE        (128)
+#define RING_BUFFER_SIZE        (256)
 /**环形缓冲区设置写入方式，默认一字节写入*/
-#define PUSH_CHAR               (1)
-#define PUSH_STRING             (0)
-/**环形缓冲数组 */
+#define PUSH_CHAR               (0)
+#define PUSH_STRING             (1)
 
-
-#define RINGBUFFER_DECLARE(name)\
-    struct ALIGN_4 name##_type {   \
-        uint8_t                ring_buffer[RING_BUFFER_SIZE];\
-		volatile uint16_t      font;\
-        volatile uint16_t      tail;\
-    } name
-
-enum {
-    BUFFER_ERROR,
-    BUFFER_SUCCESS
-};  
-
-typedef struct {
-    void(*init)(void);              /**初始化*/
-#if PUSH_CHAR
-    uint8_t(*push)(uint8_t data);      /**单字节写入*/
-#elif PUSH_STRING
-    uint8_t(*push)(uint8_t* data,uint16_t len);    /**多字节写入*/
-#endif
-}UART_HANDLER;
-
-void buffer_init(UART_HANDLER uart_handler);
 #endif
 /******************************DRIVER*********************************/
 
@@ -160,21 +136,24 @@ void buffer_init(UART_HANDLER uart_handler);
 #define NOT_AGREEMENT       (1 << 0)
 #define AGREEMENT_SPI       (1 << 1)
 #define AGREEMENT_IIC       (1 << 2)
-#define AGREEMENT_ALL       (AGREEMENT_IIC)
+#define AGREEMENT_ALL       (AGREEMENT_IIC | AGREEMENT_SPI)
 #define AGREEMENT_TARGETS   (AGREEMENT_ALL)
 
 #if (AGREEMENT_TARGETS & AGREEMENT_SPI) 
 
 #define AGREEMENT_SPI_ENABLE
 
+#define SPI_INIT
+#define SPI_SWAP_BYTE
+
+#define SSD1680_ENABLE             (1)
 
 #endif
 
 #if (AGREEMENT_TARGETS & AGREEMENT_IIC)
 #define AGREEMENT_IIC_ENABLE
 
-
-#define SSD1306_ENABLE              (1)
+#define SSD1306_ENABLE              (0)
 
 
 #endif
