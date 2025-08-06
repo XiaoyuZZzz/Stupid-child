@@ -2,6 +2,13 @@
     "files.associations": {
         "sc_type.h": "c",
         "segger_rtt.h": "c",
-        "sc_conf.h": "c"
-    }
+        "sc_conf.h": "c",
+        "stdint.h": "c",
+        "cbtimer.h": "c",
+        "bsp_uart.h": "c",
+        "c_unit.h": "c",
+        "stdarg.h": "c",
+        "sc_log.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
