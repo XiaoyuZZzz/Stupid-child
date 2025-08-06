@@ -37,16 +37,8 @@ typedef struct {
 }UART_HANDLER;
 
 
-void update_ring_buffer_front(uint16_t data);
-void update_ring_buffer_tail(uint16_t data);
-uint16_t get_ring_buffer_front(void);
-uint16_t get_ring_buffer_tail(void);
-void set_ring_buffer_rec_len(uint16_t len);
-uint16_t get_ring_buffer_rec_len(void);
-uint8_t* get_ringbuffer(void);
 void buffer_init(UART_HANDLER* uart_handler);
 uint8_t is_empty(void);
-uint8_t pop_one_char(uint8_t* data);
 #endif
 
 /**日志*/

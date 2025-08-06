@@ -11,35 +11,6 @@
 /************************************环形缓冲区*******************************/
 RINGBUFFER_DECLARE(RING_BUFFER);
 
-
-uint16_t get_ring_buffer_front(void) {
-    return RING_BUFFER.front;
-}
-
-uint16_t get_ring_buffer_tail(void) {
-    return RING_BUFFER.tail;
-}
-
-void update_ring_buffer_front(uint16_t data) {
-    RING_BUFFER.front = data;
-}
-
-void update_ring_buffer_tail(uint16_t data) {
-    RING_BUFFER.tail = data;
-}
-
-void set_ring_buffer_rec_len(uint16_t len) {
-    RING_BUFFER.rec_data_len = len;
-}
-
-uint16_t get_ring_buffer_rec_len(void) {
-    return RING_BUFFER.rec_data_len;
-}
-
-uint8_t* get_ringbuffer(void) {
-    return(uint8_t*)&RING_BUFFER.ring_buffer;
-}
-
 /**
  * @function:   void ring_buffer_init(void)
  * @breif:      环形缓冲区初始化
@@ -57,7 +28,7 @@ static void ring_buffer_init(void) {
  * @function: uint8_t is_empty(void)
  * @breif:    环形缓冲区是否为空
  */
-uint8_t is_empty(void) {
+static uint8_t is_empty(void) {
     return (RING_BUFFER.front == RING_BUFFER.tail) ? 1 :0;
  }
 
@@ -95,7 +66,7 @@ static uint8_t pop_buffer(uint8_t* data) {
  * @retval:     0-error 1-success  
  * @notes:      默认支持单字节写入
  */
-uint8_t push_one_char(uint8_t data) {
+static uint8_t push_one_char(uint8_t data) {
     return push_buffer(data);
 }
 
@@ -114,7 +85,6 @@ uint8_t pop_one_char(uint8_t* data) {
     
     return pop_buffer(data);
 }
-
 
 /**
  * @fuction:    uint8_t push_string(uint8_t* data,uint16_t len)
