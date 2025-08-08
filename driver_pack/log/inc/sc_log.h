@@ -8,8 +8,7 @@
 
 #include "sc_conf.h"
 
-#include <string.h>
-#include <stdarg.h>
+char* get_sc_log_version(void);
 
 #if RING_BUFFER_ENABLE
 /**环形缓冲数组 */
@@ -38,7 +37,6 @@ typedef struct {
 
 
 void buffer_init(UART_HANDLER* uart_handler);
-uint8_t is_empty(void);
 #endif
 
 /**日志*/

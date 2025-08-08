@@ -1,8 +1,8 @@
 /*
  * @Author       : SuperYu 824229900@qq.com
  * @Date         : 2025-07-06 16:43
- * @LastEditors  : SuperYu 824229900@qq.com
- * @LastEditTime : 2025-07-31 22:50
+ * @LastEditors  : Please set LastEditors
+ * @LastEditTime : 2025-08-07 22:40
  * @Description  : 
  */
 /**
@@ -16,11 +16,14 @@
 #ifndef USER_CONF_H__
 #define USER_CONF_H__
 
-/*内部函数*/
+/*内部文件*/
 #include "sc_log.h"
 #include "c_unit.h"
+#include "command.h"
+/**内部函数*/
 
-/**用户函数*/
+
+/**版级文件*/
 #include "stm32f4xx.h"
 #include "bsp_uart.h" 
 #include "mcu_flash.h"
