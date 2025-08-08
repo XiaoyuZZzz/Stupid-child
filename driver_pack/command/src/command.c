@@ -1,7 +1,7 @@
 /*
  * @file         : command.c
  * @Author       : shuyu
- * @LastEditTime : 2025-08-08 18:14
+ * @LastEditTime : 2025-08-08 21:02
  * @Description  : 操作命令，需要添加新的指令在此添加声明
  */
 
@@ -10,7 +10,7 @@
 
 /***************************command funciton***********************/
 REGISTER_COMMAND_FUNCTION(version) {
-    LOG(INFO,RED,"%s",get_sc_log_version());
+    LOG(INFO,RED,"version:%s",get_sc_log_version());
 }
 
 REGISTER_COMMAND_FUNCTION(hello) {
@@ -22,23 +22,24 @@ REGISTER_COMMAND(SC_VERSION,version);
 REGISTER_COMMAND(SC_HELLO,hello);
 
 
-extern uint32_t     command_section$$Base;
-extern uint32_t     command_section$$Limit;
+extern COMMAND_ENTRY command_section$$Base[];
+extern COMMAND_ENTRY command_section$$Limit[];
 
 /**TOP_API*/
 void process_command(const char* input) {
-//	// 直接使用符号地址
-//    const COMMAND_ENTRY* start = (const COMMAND_ENTRY*)&command_section$$Base;
-//    const COMMAND_ENTRY* end = (const COMMAND_ENTRY*)&command_section$$Limit;
-//    for (const COMMAND_ENTRY* cmd = start; cmd < end; cmd++){
-//        // FIXME: @sy
-//        if (strcmp(input, cmd->command_name) == 0) {
-//            cmd->command_fn(); // 执行命令
-//            return;
-//        }
-// 	   LOG(INFO,RED,"command_name:%s\r\n",cmd->command_name);
-//        cmd++;
-//    }
-// 	return ;
+	// 直接使用符号地址
+    const COMMAND_ENTRY* start = command_section$$Base;
+    const COMMAND_ENTRY* end = command_section$$Limit;
+	const COMMAND_ENTRY* cmd;
+    LOG(INFO,RED,"start:%x\rend:%x\r\n",start,end);
+	LOG(INFO,RED,"input:%s\r\n",input);
+    for (cmd = start; cmd < end; cmd++){
+        // FIXME: @sy
+        if (strcmp(input, cmd->command_name) == 0) {
+            cmd->command_fn(); // 执行命令
+            return;
+        }
+    }
+ 	return ;
 }
 

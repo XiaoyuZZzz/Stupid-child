@@ -8,7 +8,7 @@
 
 #include "sc_conf.h"
 
-char* get_sc_log_version(void);
+const char* get_sc_log_version(void);
 
 #if RING_BUFFER_ENABLE
 /**环形缓冲数组 */

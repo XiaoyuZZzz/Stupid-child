@@ -9,12 +9,16 @@
 
 const char* sc_log_version = "01-250708";
 
-char* get_sc_log_version(void) {
-	char* ret_version;
-	for(uint8_t i = 0; i< 9; i++) {
+const char* get_sc_log_version(void) {
+/*
+	char ret_version[9];
+	uint8_t i = 0;
+	for(i = 0; i< 9; i++) {
 		ret_version[i] = sc_log_version[i];
 	}
-	return ret_version;
+	return (char *)ret_version;
+*/
+	return sc_log_version;
 }
 
 #if RING_BUFFER_ENABLE

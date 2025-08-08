@@ -26,6 +26,7 @@ int main(void)
 	{
 
 		uint16_t num = usart_handler.get_data(temp_buf, sizeof(temp_buf));
+		memset(cmp_buf,0,RING_BUFFER_SIZE);
 		c_memcpy(cmp_buf,temp_buf,num);
 		if(num > 0 ) {
 			process_command(cmp_buf);
