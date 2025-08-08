@@ -1,8 +1,8 @@
 /*
  * @Author       : 824229900@qq.com
  * @Date         : 2025-07-31 21:52
- * @LastEditors  : SuperYu 824229900@qq.com
- * @LastEditTime : 2025-07-31 23:53
+ * @LastEditors  : Please set LastEditors
+ * @LastEditTime : 2025-08-07 20:55
  * @Description  : 
  */
 
@@ -27,3 +27,47 @@ size_t c_strlen(char *arr)
 	while (*p2++ != '\0');
 	return p2 - p1 - 1;
 }
+
+
+int sunday_search(const char *text, const char *pattern) {
+    int text_len = strlen(text);
+    int pattern_len = strlen(pattern);
+    
+    if (pattern_len == 0) return 0;
+    if (text_len < pattern_len) return -1;
+    
+    int shift_table[ALPHABET_SIZE];
+    
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        shift_table[i] = pattern_len + 1;
+    }
+    
+    for (int i = 0; i < pattern_len; i++) {
+        shift_table[(unsigned char)pattern[i]] = pattern_len - i;
+    }
+    
+    int i = 0; 
+    
+    while (i <= text_len - pattern_len) {
+        int j = 0; 
+        
+        while (j < pattern_len && text[i + j] == pattern[j]) {
+            j++;
+        }
+
+        if (j == pattern_len) {
+            return i;
+        }
+        
+        if (i + pattern_len >= text_len) {
+            break;
+        }
+        
+        unsigned char next_char = text[i + pattern_len];
+        
+        i += shift_table[next_char];
+    }
+    
+    return -1; 
+}
+

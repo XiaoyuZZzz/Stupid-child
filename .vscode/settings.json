@@ -8,7 +8,8 @@
         "bsp_uart.h": "c",
         "c_unit.h": "c",
         "stdarg.h": "c",
-        "sc_log.h": "c"
+        "sc_log.h": "c",
+        "stm32f4xx.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

@@ -7,6 +7,20 @@
 
 #include "sc_log.h" 
 
+const char* sc_log_version = "01-250708";
+
+const char* get_sc_log_version(void) {
+/*
+	char ret_version[9];
+	uint8_t i = 0;
+	for(i = 0; i< 9; i++) {
+		ret_version[i] = sc_log_version[i];
+	}
+	return (char *)ret_version;
+*/
+	return sc_log_version;
+}
+
 #if RING_BUFFER_ENABLE
 /************************************环形缓冲区*******************************/
 RINGBUFFER_DECLARE(RING_BUFFER);
@@ -114,6 +128,13 @@ uint8_t push_string(uint8_t* data, uint16_t len) {
     return BUFFER_SUCCESS;
 }
 
+/**
+ * @funciton:       get_data
+ * @brief:          获取环形缓冲区的数据
+ * @param{dest}:    接收的缓冲区
+ * @param{max_len}: 需要读取的数据长度
+ * @note：          真正读取的数据长度取决于两个指针之间的差值
+ */
 static uint16_t get_data(uint8_t* dest, uint16_t max_len) {
     uint16_t bytes_available = 0;
     uint16_t bytes_to_copy = 0;
@@ -358,7 +379,7 @@ void log_printf(uint8_t level, const char* format, ...) {
 
 /***********************FLASH日志实现**********************/
 #ifdef FLASH_DEBUG_ENABLE
-COMPONENT_INIT(CTRL,ctrl_info)                          // 初始化控制参数
+//COMPONENT_INIT(CTRL,ctrl_info)                          // 初始化控制参数
 COMPONENT_INIT(HEAD,log_head_ctrl)
 static FLASH_MANEGER info_manager,err_manager,warn_manager;
 
@@ -432,7 +453,7 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
     uint32_t write_start_addr;  //  写入的地址
     static uint8_t info_count,err_count,warn_count;
 
-    uint8_t type_bit = 0;
+    //uint8_t type_bit = 0;
     uint8_t ret = LOG_OK;
 
     log_pack.data_len = len;
@@ -467,8 +488,9 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
         }else {
             ret = LOG_INFO_SIZE_FULL;
         }
-#else 
+
         type_bit = 1;       // 1
+#else 
         write_start_addr = log_head_ctrl.info_log_start_addr  + sizeof(FLASH_MANEGER) + (info_count++) * sizeof(LOG_PACK);
         log_pack.event_id = info_count;
         log_head_ctrl.ops.flash_write(write_start_addr, (uint32_t*)&log_pack, sizeof(LOG_PACK) / 4);
@@ -497,9 +519,10 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
         }else {
             ret = LOG_ERR_SIZE_FULL;
         }
-#else
+
 
         type_bit = 2;
+#else
         write_start_addr = log_head_ctrl.err_log_start_addr  + sizeof(FLASH_MANEGER) + (err_count++) * sizeof(LOG_PACK);
         log_pack.event_id = err_count;
         log_head_ctrl.ops.flash_write(write_start_addr, (uint32_t*)&log_pack, sizeof(LOG_PACK) / 4);
@@ -528,9 +551,10 @@ static uint8_t flash_log_write(uint8_t log_type,uint8_t* p_data,uint8_t len) {
         }else {
             ret = LOG_RAWN_SIZE_FULL;
         }
-#else 
+
 
         type_bit = 3;
+#else 
         write_start_addr = log_head_ctrl.warn_log_start_addr  + sizeof(FLASH_MANEGER) + (warn_count++) * sizeof(LOG_PACK);
         log_pack.event_id = warn_count;
         log_head_ctrl.ops.flash_write(write_start_addr, (uint32_t*)&log_pack, sizeof(LOG_PACK) / 4);
@@ -641,7 +665,7 @@ uint8_t f_log_read(uint8_t log_type,uint8_t indx,LOG_PACK* log_pack) {
 }
 
 
-
-
-
 #endif
+
+
+
