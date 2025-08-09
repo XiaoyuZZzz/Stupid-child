@@ -9,7 +9,11 @@
         "c_unit.h": "c",
         "stdarg.h": "c",
         "sc_log.h": "c",
-        "stm32f4xx.h": "c"
+        "stm32f4xx.h": "c",
+        "mcu_spi.h": "c",
+        "lcd_driver.h": "c",
+        "command.h": "c",
+        "epd.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

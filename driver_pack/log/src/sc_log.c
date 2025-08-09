@@ -46,20 +46,7 @@ static uint8_t is_empty(void) {
     return (RING_BUFFER.front == RING_BUFFER.tail) ? 1 :0;
  }
 
- /**
-  * @function: uint8_t push_buffer(uint8_t data)
-  * @brief  :  入队
-  */
-static uint8_t push_buffer(uint8_t data) {
-    if ((RING_BUFFER.front + 1) % RING_BUFFER_SIZE == RING_BUFFER.tail) {
-        return BUFFER_ERROR;
-    }
-    RING_BUFFER.ring_buffer[RING_BUFFER.front] = data;
-    RING_BUFFER.front = (RING_BUFFER.front + 1) % RING_BUFFER_SIZE;
-    return BUFFER_SUCCESS;
- }
-
- /**
+  /**
   * @funciton: uint8_t pop_buffer(uint8_t* data)
   * @breif:     出队
   */
@@ -73,6 +60,23 @@ static uint8_t pop_buffer(uint8_t* data) {
     return BUFFER_SUCCESS;
 }
 
+
+#if PUSH_CHAR
+ /**
+  * @function: uint8_t push_buffer(uint8_t data)
+  * @brief  :  入队
+  */
+static uint8_t push_buffer(uint8_t data) {
+    if ((RING_BUFFER.front + 1) % RING_BUFFER_SIZE == RING_BUFFER.tail) {
+        return BUFFER_ERROR;
+    }
+    RING_BUFFER.ring_buffer[RING_BUFFER.front] = data;
+    RING_BUFFER.front = (RING_BUFFER.front + 1) % RING_BUFFER_SIZE;
+    return BUFFER_SUCCESS;
+ }
+
+
+
 /**
  * @funciton:   uint8_t push_one_char(uint8_t data)
  * @breif:      输入一个字节的数据
@@ -83,7 +87,7 @@ static uint8_t pop_buffer(uint8_t* data) {
 static uint8_t push_one_char(uint8_t data) {
     return push_buffer(data);
 }
-
+#endif
 
 /**
  * @funciton:   uint8_t pop_one_char(uint8_t* data)

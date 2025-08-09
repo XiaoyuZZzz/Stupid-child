@@ -36,7 +36,7 @@
  * |-->DEBUG_FLASH
  * |-->warning message
  */
-#define LOG_PATH_ENABLE                 (0)         // 是否开启文件路径及函数调用
+#define LOG_PATH_ENABLE                 (1)         // 是否开启文件路径及函数调用
 
  /**日志类型 */
 enum {
@@ -52,7 +52,7 @@ enum {
 #define DEBUG_RTT_BIT       (1 << 1)
 #define DEBUG_UART_BIT      (1 << 2)
 #define DEBUG_FLASH_BIT     (1 << 3)
-#define DEBG_ALL_BIT        (DEBUG_UART_BIT)
+#define DEBG_ALL_BIT        (DEBUG_UART_BIT | DEBUG_RTT_BIT | DEBUG_FLASH_BIT)
 #define DEBUG_TARGETS       (DEBG_ALL_BIT)
 
 #if (DEBUG_TARGETS & DEBUG_RTT_BIT) 
@@ -144,12 +144,40 @@ enum {
 
 #if (AGREEMENT_TARGETS & AGREEMENT_SPI) 
 
-#define AGREEMENT_SPI_ENABLE
+// TODO: 有些需要延时初始化，后续需要考虑一下怎么处理，目前时采用阻塞式延时
+#define DELAY_MS                delay_ms
 
-#define SPI_INIT
-#define SPI_SWAP_BYTE
+// 用户的屏幕大小
+
+// 注册用户的屏幕大小
+#define LCD_WIDTH	                (152 )
+#define LCD_HEIGHT	                (152)
 
 #define SSD1680_ENABLE             (1)
+#define AGREEMENT_SPI_ENABLE
+
+// 输入用户的SPI初始化函数
+#define SPI_INIT                    spi_gpio_init
+// 输入用户的SPI发送函数            
+#define SPI_SWAP_BYTE               spi_transbyte
+// 输入用户设置CS函数
+#define SPI_SET_CS                  spi_set_cs
+// 输入用户设置DC函数
+#define SPI_SET_DC                  spi_set_dc
+
+#define NEED_JUD_BUSY               (1)
+#define NEED_SIPPORT_RESET          (1)
+// 如果需要BUSY线，那么需要开启宏定义
+#if NEED_JUD_BUSY
+#define SPI_READ_BUSY               spi_read_busy
+#endif
+// 如果需要支持RESET引脚，那么需要开启宏定义
+#if NEED_SIPPORT_RESET
+#define PSI_SET_RESET               spi_set_reset
+#endif
+
+
+
 
 #endif
 

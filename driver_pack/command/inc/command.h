@@ -32,5 +32,6 @@ void process_command(const char* input);
 /******************************************command_name*************************************/
 #define SC_VERSION 						"version"
 #define SC_HELLO                        "hello"
+#define SC_CHECKIMG						"checkimg"
 
 #endif
